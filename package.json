@@ -1,5 +1,5 @@
 {
-    "name": "msal-angular",
+    "name": "agri-msal-angular",
     "version": "1.0.3",
     "description": "Angular MSAL wrapper.",
     "main": "index.js",

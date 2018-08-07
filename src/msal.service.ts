@@ -1,6 +1,7 @@
 import { Injectable, InjectionToken, Inject } from '@angular/core';
 import { MsalConfig } from './msal-config';
 import * as Msal from 'msal';
+import { MsalPolicyType } from './msal.policytype';
 
 export const MSAL_CONFIG = new InjectionToken<string>('MSAL_CONFIG');
 
@@ -9,22 +10,19 @@ export class MsalService {
 
   public error: string;
   private app: Msal.UserAgentApplication;
+  private accessToken: string;
 
   constructor(@Inject(MSAL_CONFIG) private config: MsalConfig) {
     // set default values.
     this.config = {
       ...this.config,
       popup: !(this.config.popup == null) ? this.config.popup : true,
-      callback: this.config.callback ? this.config.callback : () => { },
-      redirectUrl: this.config.redirectUrl ? this.config.redirectUrl : window.location.href,
+      callback: this.config.callback ? this.config.callback : (errorDesc: any, token: any, error: any, tokenType: any) => this.callback(errorDesc, token, error, tokenType),
+      redirectUrl: this.config.redirectUrl,
       navigateToLoginRequestUrl: !(this.config.navigateToLoginRequestUrl == null) ? this.config.navigateToLoginRequestUrl : false
     }
-    const authority = config.authority;
-    this.app = new Msal.UserAgentApplication(config.clientID, authority, config.callback,
-      {
-        navigateToLoginRequestUrl: this.config.navigateToLoginRequestUrl,
-        redirectUri: this.getFullUrl(this.config.redirectUrl)
-      });
+
+    this.app = this.app = this.getMsalUserAgentApplication(this.config, MsalPolicyType.SignUpSignIn);
   }
 
   public getUser() {
@@ -99,5 +97,34 @@ export class MsalService {
   private origin() {
     return (window.location.origin) ? window.location.origin :
       window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+  }
+
+  private callback(errorDesc: any, token: any, error: any, tokenType: any) {
+    if (token) {
+        this.accessToken = token;
+      }
+      if (errorDesc) {
+        if (errorDesc.indexOf('AADB2C90118') > -1) {                    
+          this.app = this.getMsalUserAgentApplication(this.config, MsalPolicyType.PasswordReset);
+          this.login();
+        }
+        else {
+            this.app = this.getMsalUserAgentApplication(this.config, MsalPolicyType.SignUpSignIn);
+        }
+      }
+  }
+
+  private getMsalUserAgentApplication(config: MsalConfig, policyType: MsalPolicyType): Msal.UserAgentApplication {
+      switch(policyType) {
+          case MsalPolicyType.SignUpSignIn:
+            return new Msal.UserAgentApplication(this.config.clientID, this.config.signUpSignInAuthority, this.config.callback,
+                {
+                  navigateToLoginRequestUrl: this.config.navigateToLoginRequestUrl,
+                  redirectUri: this.getFullUrl(this.config.redirectUrl)
+                });            
+          case MsalPolicyType.PasswordReset:
+            return new Msal.UserAgentApplication(this.config.clientID, this.config.passwordresetAuthority, this.config.callback);            
+      }
+    
   }
 }
