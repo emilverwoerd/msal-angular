@@ -3,17 +3,17 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { MsalService } from './msal.service';
-import { MsalConfigLocation } from './msal-config-location';
-import { MSAL_CONFIG_LOCATION } from './msal-config.service';
+import { MsalConfigEnvironment } from './msal-config-environment';
+import { MSAL_CONFIG_ENVIRONMENT } from './msal-config-environment.service';
 
 @Injectable()
 export class MsalInterceptor implements HttpInterceptor {
 
-    constructor(@Inject(MSAL_CONFIG_LOCATION) private configLocation: MsalConfigLocation,
+    constructor(@Inject(MSAL_CONFIG_ENVIRONMENT) private configEnvironment: MsalConfigEnvironment,
                 private msalService: MsalService) { }
 
     public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {       
-        if (req.url === this.configLocation.path) {
+        if (req.url === this.configEnvironment.path) {
             return next.handle(req);
         }
         else {        

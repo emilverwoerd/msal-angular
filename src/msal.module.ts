@@ -4,8 +4,8 @@ import { MsalService } from "./msal.service";
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { MsalInterceptor} from './msal.interceptor'
 import { MsalGuard } from "./msal.guard";
-import { MsalConfigLocation } from "./msal-config-location";
-import { MSAL_CONFIG_LOCATION, MsalConfigService } from "./msal-config.service";
+import { MsalConfigEnvironment } from "./msal-config-environment";
+import { MSAL_CONFIG_ENVIRONMENT, MsalConfigEnvironmentService } from "./msal-config-environment.service";
 
 @NgModule({
     imports: [
@@ -15,12 +15,12 @@ import { MSAL_CONFIG_LOCATION, MsalConfigService } from "./msal-config.service";
 })
 
 export class MsalModule {
-    static forRoot(configLocation: MsalConfigLocation): ModuleWithProviders {        
+    static forRoot(configEnvironment: MsalConfigEnvironment): ModuleWithProviders {        
         return {
             ngModule: MsalModule,
             providers: [
-                { provide: MSAL_CONFIG_LOCATION, useValue: configLocation },                
-                MsalConfigService,
+                { provide: MSAL_CONFIG_ENVIRONMENT, useValue: configEnvironment },                
+                MsalConfigEnvironmentService,
                 MsalService,
                 { provide: HTTP_INTERCEPTORS, useClass: MsalInterceptor, multi: true }
             ]

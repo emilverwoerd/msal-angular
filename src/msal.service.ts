@@ -2,8 +2,8 @@ import { Injectable, InjectionToken, Inject } from '@angular/core';
 import { MsalConfig } from './msal-config';
 import * as Msal from 'msal';
 import { MsalPolicyType } from './msal.policytype';
-import { MsalConfigService } from './msal-config.service';
-import { resolveComponentResources } from '../node_modules/@angular/core/src/metadata/resource_loading';
+import { MsalConfigEnvironmentService } from './msal-config-environment.service';
+import { resolveComponentResources } from '@angular/core/src/metadata/resource_loading';
 
 @Injectable()
 export class MsalService {
@@ -13,7 +13,7 @@ export class MsalService {
   private accessToken: string;
   private config: MsalConfig;
 
-  constructor(private msalConfigService: MsalConfigService) {
+  constructor(private msalConfigEnvironmentService: MsalConfigEnvironmentService) {
    
   }
 
@@ -42,7 +42,7 @@ export class MsalService {
             resolve(this.config);
         } 
         else {
-            return this.msalConfigService.getConfig()
+            return this.msalConfigEnvironmentService.getConfig()
                 .then((cfg: MsalConfig) =>{
                     this.config = cfg;           
                     this.config = {
@@ -121,7 +121,7 @@ export class MsalService {
     this.getDefaultMsalUserAgentApplication().then((app) =>{
         app.loginRedirect (this.config.graphScopes);
     }) 
-    
+
     return this.getToken().then(() => {
       Promise.resolve(this.app.getUser());
     });
